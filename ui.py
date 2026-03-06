@@ -89,7 +89,7 @@ def draw_selection(screen, state):
     )
 
 
-def draw_instructions(screen, font, height):
+def draw_instructions(screen, font, width):
     text1 = font.render(
         "Arrow Keys: Move",
         True,
@@ -116,21 +116,21 @@ def draw_instructions(screen, font, height):
         (0, 0, 0)
     )
 
-    screen.blit(text1, (20, height - 120))
-    screen.blit(text2, (20, height - 100))
-    screen.blit(text3, (20, height - 80))
-    screen.blit(text4, (20, height - 60))
-    screen.blit(text5, (20, height - 40))
+    screen.blit(text1, (20, width - 120))
+    screen.blit(text2, (20, width - 100))
+    screen.blit(text3, (20, width - 80))
+    screen.blit(text4, (20, width - 60))
+    screen.blit(text5, (20, width - 40))
 
 
-def draw_result(screen, font, height):
+def draw_result(screen, font, width):
     text = font.render("PUZZLE SOLVED!", True, (0,150, 0))
-    screen.blit(text, (20, height - 90))
+    screen.blit(text, (20, width - 90))
 
-def draw_warning(screen, font, height):
+def draw_warning(screen, font, width):
     text = font.render("Wrong answers", True, (200, 0, 0))
-    screen.blit(text, (20, height - 90))
+    screen.blit(text, (20, width - 90))
 
-def draw_fill_warning(screen, font, height):
+def draw_fill_warning(screen, font, width):
     text = font.render("Fill all cells", True, (255, 191, 0))
-    screen.blit(text, (20, height - 90))
+    screen.blit(text, (20, width - 90))
