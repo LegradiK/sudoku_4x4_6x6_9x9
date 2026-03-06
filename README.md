@@ -1,7 +1,10 @@
-# 6x6 Sudoku
+# Sudoku
 
-A desktop 6x6 Sudoku puzzle game built with Python and Pygame.
+A desktop Sudoku puzzle game built with Python and Pygame.
+4x4, 6x6, 9x9 are all available with difficulty settings (easy, medium, hard).
 
+
+------make changes from here------------
 ## Features
 
 - 6×6 Sudoku grid with 2×3 box regions
