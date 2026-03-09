@@ -2,14 +2,16 @@ import pygame
 
 
 class GameState_6x6:
-    def __init__(self, grid, original_grid, cell_size, font_big, font_medium, font_small):
+    def __init__(self, grid, original_grid, cell_size, font_4x4, font_6x6, font_9x9, font_medium, font_text):
         self.grid = grid
         self.original_grid = original_grid
         self.solution = None
         self.cell_size = cell_size
-        self.font_big = font_big
+        self.font_num = font_4x4
+        self.font_num = font_6x6
+        self.font_num = font_9x9
         self.font_medium = font_medium
-        self.font_small = font_small
+        self.font_text = font_text
         self.selected_row = 0
         self.selected_col = 0
         self.wrong_cells = set()
@@ -48,9 +50,9 @@ def draw_grid_lines(screen, state):
 
 def draw_numbers(screen, state):
     dif = state.cell_size
-
-    for row in range(6):
-        for col in range(6):
+    grid_size = len(state.grid)
+    for row in range(grid_size):
+        for col in range(grid_size):
             value = state.grid[row][col]
 
             if value != 0:
@@ -67,7 +69,7 @@ def draw_numbers(screen, state):
                 else:
                     color = (0, 0, 0)
 
-                text = state.font_big.render(str(value), True, color)
+                text = state.font_num.render(str(value), True, color)
                 text_rect = text.get_rect(center=(
                     col * dif + dif / 2,
                     row * dif + dif / 2

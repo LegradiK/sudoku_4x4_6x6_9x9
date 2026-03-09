@@ -1,39 +1,9 @@
 import pygame
 import requests
 from button import Button
-from ui_4x4 import (
-    GameState_4x4,
-    draw_background,
-    draw_grid_lines,
-    draw_numbers,
-    draw_selection,
-    draw_instructions,
-    draw_result,
-    draw_warning,
-    draw_fill_warning
-)
-from ui_6x6 import (
-    GameState_6x6,
-    draw_background,
-    draw_grid_lines,
-    draw_numbers,
-    draw_selection,
-    draw_instructions,
-    draw_result,
-    draw_warning,
-    draw_fill_warning
-)
-from ui_9x9 import (
-    GameState_9x9,
-    draw_background,
-    draw_grid_lines,
-    draw_numbers,
-    draw_selection,
-    draw_instructions,
-    draw_result,
-    draw_warning,
-    draw_fill_warning
-)
+import ui_4x4
+import ui_6x6
+import ui_9x9
 
 SCREEN_WIDTH = 1120
 SCREEN_HEIGHT = 800
@@ -44,9 +14,11 @@ pygame.font.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Sudoku")
 
-font_big = pygame.font.SysFont("comicsans", 120)
+font_4x4 = pygame.font.SysFont("comicsans", 180)
+font_6x6 = pygame.font.SysFont("comicsans", 120)
+font_9x9 = pygame.font.SysFont("comicsans", 80)
 font_medium = pygame.font.SysFont("Arial", 40, bold=True)
-font_small = pygame.font.SysFont("Arial", 18)
+font_text = pygame.font.SysFont("Arial", 18)
 
 # buttons at the right hand side
 game_4x4_button = Button("4x4", 820, 150, 90, 60, font_size=29)
@@ -79,6 +51,10 @@ DIFFICULTY_CLUES = {
     }
 }
 
+UI = {
+    "4x4"
+}
+
 selected_difficulty = "easy"
 
 chosen_game = "4x4"
@@ -88,16 +64,12 @@ def get_grid_size(game):
     """Return the integer grid size for the chosen game string."""
     return {"4x4": 4, "6x6": 6, "9x9": 9}[game]
 
-def load_new_game(size=chosen_game, num_clues=selected_difficulty):
+def load_new_game(game, difficulty):
     # sudoku generating from Docker jotools/sudoku
     url = "http://localhost:8080/api/sudoku/generate"
 
-    if chosen_game == "4x4":
-        size = 4
-    elif chosen_game == "6x6":
-        size = 6
-    elif chosen_game == "9x9":
-        size = 9
+    size = get_grid_size(game)
+    num_clues = DIFFICULTY_CLUES[game][difficulty]
 
     params = {
         "size": size,
@@ -147,12 +119,18 @@ def make_state(game, quiz, solution):
         grid=quiz,
         original_grid=original_grid,
         cell_size=cell_size,
-        font_big=font_big,
+        font_4x4 = font_4x4,
+        font_6x6=font_6x6,
+        font_9x9 = font_9x9,
         font_medium=font_medium,
-        font_small=font_small
+        font_text=font_text
     )
     state.solution = solution
     return state
+
+def switch_game(game, difficulty):
+    quiz, solution, locked = load_new_game(game, difficulty)
+    return make_state(game, quiz, solution)
 
 def draw_sudoku_buttons(screen, mouse_pos, selected):
     """Draw 4x4/6x6/9x9 buttons, highlighting the selected one."""
@@ -182,13 +160,8 @@ def validate_against_solution(state, grid_size):
                 state.wrong_cells.add((row, col))
 
 
-
-quiz, solution, locked = load_new_game(num_clues=DIFFICULTY_CLUES[chosen_game][selected_difficulty])
-original_grid = [row[:] for row in quiz]
-
-state = make_state(chosen_game, quiz, solution)
-
-state.solution = solution
+# Initial loading
+state = switch_game(chosen_game, selected_difficulty)
 
 is_solved = False
 show_warning = False
@@ -198,6 +171,8 @@ running = True
 
 while running:
     grid_size = get_grid_size(chosen_game)
+    max_index = grid_size - 1
+
     draw_background(screen)
 
     for event in pygame.event.get():
@@ -206,12 +181,7 @@ while running:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if new_game_button.is_clicked(event):
-                quiz, solution, locked = load_new_game(num_clues=DIFFICULTY_CLUES[chosen_game][selected_difficulty])
-                state = make_state(chosen_game, quiz, solution)
-                state.grid = [row[:] for row in quiz]
-                state.original_grid = [row[:] for row in quiz]
-                state.solution = solution
-                state.wrong_cells.clear()
+                state = switch_game(chosen_game, selected_difficulty)
                 is_solved = False
                 show_warning = False
                 show_fill_warning = False
@@ -225,22 +195,19 @@ while running:
 
             elif game_4x4_button.is_clicked(event):
                 chosen_game = "4x4"
-                quiz, solution, locked = load_new_game(chosen_game, selected_difficulty)
-                state = make_state(chosen_game, quiz, solution)
+                state = switch_game(chosen_game, selected_difficulty)
                 is_solved = False
                 show_warning = False
                 show_fill_warning = False
             elif game_6x6_button.is_clicked(event):
                 chosen_game = "6x6"
-                quiz, solution, locked = load_new_game(chosen_game, selected_difficulty)
-                state = make_state(chosen_game, quiz, solution)
+                state = switch_game(chosen_game, selected_difficulty)
                 is_solved = False
                 show_warning = False
                 show_fill_warning = False
             elif game_9x9_button.is_clicked(event):
                 chosen_game = "9x9"
-                quiz, solution, locked = load_new_game(chosen_game, selected_difficulty)
-                state = make_state(chosen_game, quiz, solution)
+                state = switch_game(chosen_game, selected_difficulty)
                 is_solved = False
                 show_warning = False
                 show_fill_warning = False
@@ -310,9 +277,11 @@ while running:
                     if not state.wrong_cells:
                         is_solved = True
                         show_warning = False
+                        show_fill_warning = False
                     else:
                         is_solved = False
                         show_warning = True
+                        show_fill_warning = False
 
             if event.key in (
                 pygame.K_BACKSPACE,
@@ -340,7 +309,7 @@ while running:
     elif show_fill_warning:
         draw_fill_warning(screen, font_medium, SCREEN_HEIGHT)
     else:
-        draw_instructions(screen, font_small, SCREEN_HEIGHT)
+        draw_instructions(screen, font_text, SCREEN_HEIGHT)
 
     mouse_pos = pygame.mouse.get_pos()
     draw_sudoku_buttons(screen, mouse_pos, chosen_game)
