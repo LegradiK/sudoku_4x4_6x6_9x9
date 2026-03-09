@@ -1,8 +1,30 @@
 import pygame
 import requests
 from button import Button
-from ui import (
-    GameState,
+from ui_4x4 import (
+    GameState_4x4,
+    draw_background,
+    draw_grid_lines,
+    draw_numbers,
+    draw_selection,
+    draw_instructions,
+    draw_result,
+    draw_warning,
+    draw_fill_warning
+)
+from ui_6x6 import (
+    GameState_6x6,
+    draw_background,
+    draw_grid_lines,
+    draw_numbers,
+    draw_selection,
+    draw_instructions,
+    draw_result,
+    draw_warning,
+    draw_fill_warning
+)
+from ui_9x9 import (
+    GameState_9x9,
     draw_background,
     draw_grid_lines,
     draw_numbers,
@@ -130,15 +152,33 @@ def draw_difficulty_buttons(screen, mouse_pos, selected):
 quiz, solution, locked = load_new_game(num_clues=DIFFICULTY_CLUES[chosen_game][selected_difficulty])
 original_grid = [row[:] for row in quiz]
 
-
-state = GameState(
-    grid=quiz,
-    original_grid=original_grid,
-    cell_size=cell_size,
-    font_big=font_big,
-    font_medium=font_medium,
-    font_small=font_small
-)
+if chosen_game == "4x4":
+    state = GameState_4x4(
+        grid=quiz,
+        original_grid=original_grid,
+        cell_size=cell_size,
+        font_big=font_big,
+        font_medium=font_medium,
+        font_small=font_small
+    )
+elif chosen_game == "6x6":
+        state = GameState_6x6(
+        grid=quiz,
+        original_grid=original_grid,
+        cell_size=cell_size,
+        font_big=font_big,
+        font_medium=font_medium,
+        font_small=font_small
+    )
+elif chosen_game == "9x9":
+        state = GameState_9x9(
+        grid=quiz,
+        original_grid=original_grid,
+        cell_size=cell_size,
+        font_big=font_big,
+        font_medium=font_medium,
+        font_small=font_small
+    )
 
 state.solution = solution
 
@@ -170,14 +210,33 @@ def solve(board):
 
     row, col = empty
 
-    for num in range(1, 7):
-        if is_valid(board, row, col, num):
-            board[row][col] = num
+    if chosen_game == "4x4":
+        for num in range(1, 5):
+            if is_valid(board, row, col, num):
+                board[row][col] = num
 
-            if solve(board):
-                return True
+                if solve(board):
+                    return True
 
-            board[row][col] = 0
+                board[row][col] = 0
+    elif chosen_game == "6x6":
+        for num in range(1, 7):
+            if is_valid(board, row, col, num):
+                board[row][col] = num
+
+                if solve(board):
+                    return True
+
+                board[row][col] = 0
+    elif chosen_game == "9x9":
+        for num in range(1, 10):
+            if is_valid(board, row, col, num):
+                board[row][col] = num
+
+                if solve(board):
+                    return True
+
+                board[row][col] = 0
 
     return False
 
@@ -262,8 +321,10 @@ while running:
                 state.selected_row = min(3, state.selected_row + 1)
 
             if event.key in (
-                pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4,pygame.K_5, pygame.K_6,
-                pygame.K_KP1, pygame.K_KP2, pygame.K_KP3, pygame.K_KP4, pygame.K_KP5, pygame.K_KP6
+                pygame.K_1, pygame.K_2, pygame.K_3, pygame.K_4,pygame.K_5, 
+                pygame.K_6, pygame.K_7, pygame.K_8, pygame.K_9,
+                pygame.K_KP1, pygame.K_KP2, pygame.K_KP3, pygame.K_KP4, 
+                pygame.K_KP5, pygame.K_KP6, pygame.K_KP7, pygame.K_KP8, pygame.K_KP9
             ):
                 value = int(event.unicode)
                 row = state.selected_row

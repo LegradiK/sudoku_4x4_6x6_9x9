@@ -1,7 +1,7 @@
 import pygame
 
 
-class GameState:
+class GameState_4x4:
     def __init__(self, grid, original_grid, cell_size, font_big, font_medium, font_small):
         self.grid = grid
         self.original_grid = original_grid
@@ -22,35 +22,33 @@ def draw_background(screen):
 def draw_grid_lines(screen, state):
     dif = state.cell_size
 
-    for i in range(7):
-        h_thickness = 4 if i % 2 == 0 else 1
+    for i in range(5):
+        thickness = 4 if i % 2 == 0 else 1
 
         # Horizontal lines
         pygame.draw.line(
             screen,
             (0, 0, 0),
             (0, i * dif),
-            (dif * 6, i * dif),
-            h_thickness
+            (dif * 4, i * dif),
+            thickness
         )
-
-        v_thickness = 4 if i % 3 == 0 else 1
 
         # Vertical lines
         pygame.draw.line(
             screen,
             (0, 0, 0),
             (i * dif, 0),
-            (i * dif, dif * 6),
-            v_thickness
+            (i * dif, dif * 4),
+            thickness
         )
 
 
 def draw_numbers(screen, state):
     dif = state.cell_size
 
-    for row in range(6):
-        for col in range(6):
+    for row in range(4):
+        for col in range(4):
             value = state.grid[row][col]
 
             if value != 0:
@@ -96,7 +94,7 @@ def draw_instructions(screen, font, height):
         (0, 0, 0)
     )
     text2 = font.render(
-        "1-6: Input",
+        "1-4: Input",
         True,
         (0, 0, 0)
     )
@@ -116,11 +114,11 @@ def draw_instructions(screen, font, height):
         (0, 0, 0)
     )
 
-    screen.blit(text1, (820, height - 120))
-    screen.blit(text2, (820, height - 100))
-    screen.blit(text3, (820, height - 80))
-    screen.blit(text4, (820, height - 60))
-    screen.blit(text5, (820, height - 40))
+    screen.blit(text1, (20, height - 120))
+    screen.blit(text2, (20, height - 100))
+    screen.blit(text3, (20, height - 80))
+    screen.blit(text4, (20, height - 60))
+    screen.blit(text5, (20, height - 40))
 
 
 def draw_result(screen, font, height):
