@@ -45,7 +45,7 @@ def draw_grid_lines(screen, state):
 def draw_numbers(screen, state):
     dif = state.cell_size
 
-    for row in range(9):
+    for row in range(len(state.grid)):
         for col in range(9):
             value = state.grid[row][col]
 

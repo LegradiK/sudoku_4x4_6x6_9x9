@@ -37,7 +37,6 @@ from ui_9x9 import (
 
 SCREEN_WIDTH = 1120
 SCREEN_HEIGHT = 800
-GRID_SIZE = 6
 
 pygame.init()
 pygame.font.init()
@@ -84,7 +83,10 @@ selected_difficulty = "easy"
 
 chosen_game = "4x4"
 
-cell_size = SCREEN_HEIGHT // GRID_SIZE
+
+def get_grid_size(game):
+    """Return the integer grid size for the chosen game string."""
+    return {"4x4": 4, "6x6": 6, "9x9": 9}[game]
 
 def load_new_game(size=chosen_game, num_clues=selected_difficulty):
     # sudoku generating from Docker jotools/sudoku
@@ -109,8 +111,6 @@ def load_new_game(size=chosen_game, num_clues=selected_difficulty):
 
     puzzle_cells = data['sudoku']
     solution_cells = data['solution']
-
-    size = 6
 
     puzzle_grid = [[0] * size for i in range(size)]
     solution_grid = [[0] * size for i in range(size)]
@@ -137,6 +137,23 @@ def load_new_game(size=chosen_game, num_clues=selected_difficulty):
     
     return puzzle_grid, solution_grid, locked_grid
 
+def make_state(game, quiz, solution):
+    size = get_grid_size(game)
+    cell_size = SCREEN_HEIGHT // size
+    original_grid = [row[:] for row in quiz]
+
+    cls = {"4x4": GameState_4x4, "6x6": GameState_6x6, "9x9": GameState_9x9}[game]
+    state = cls(
+        grid=quiz,
+        original_grid=original_grid,
+        cell_size=cell_size,
+        font_big=font_big,
+        font_medium=font_medium,
+        font_small=font_small
+    )
+    state.solution = solution
+    return state
+
 def draw_sudoku_buttons(screen, mouse_pos, selected):
     """Draw 4x4/6x6/9x9 buttons, highlighting the selected one."""
     for btn, key in [(game_4x4_button, "4x4"), (game_6x6_button, "6x6"), (game_9x9_button, "9x9")]:
@@ -149,106 +166,14 @@ def draw_difficulty_buttons(screen, mouse_pos, selected):
         is_selected = (selected == key)
         btn.draw(screen, mouse_pos, highlighted=is_selected)
 
-quiz, solution, locked = load_new_game(num_clues=DIFFICULTY_CLUES[chosen_game][selected_difficulty])
-original_grid = [row[:] for row in quiz]
+ 
 
-if chosen_game == "4x4":
-    state = GameState_4x4(
-        grid=quiz,
-        original_grid=original_grid,
-        cell_size=cell_size,
-        font_big=font_big,
-        font_medium=font_medium,
-        font_small=font_small
-    )
-elif chosen_game == "6x6":
-        state = GameState_6x6(
-        grid=quiz,
-        original_grid=original_grid,
-        cell_size=cell_size,
-        font_big=font_big,
-        font_medium=font_medium,
-        font_small=font_small
-    )
-elif chosen_game == "9x9":
-        state = GameState_9x9(
-        grid=quiz,
-        original_grid=original_grid,
-        cell_size=cell_size,
-        font_big=font_big,
-        font_medium=font_medium,
-        font_small=font_small
-    )
-
-state.solution = solution
-
-is_solved = False
-show_warning = False
-show_fill_warning = False
-running = True
-
-
-def is_valid(state, row, col, val):
-    if state.solution is None:
-        return False
-    elif val == state.solution[row][col]:
-        return True
-
-
-def find_empty(board):
-    for r in range(GRID_SIZE):
-        for c in range(GRID_SIZE):
-            if board[r][c] == 0:
-                return r, c
-    return None
-
-
-def solve(board):
-    empty = find_empty(board)
-    if not empty:
-        return True
-
-    row, col = empty
-
-    if chosen_game == "4x4":
-        for num in range(1, 5):
-            if is_valid(board, row, col, num):
-                board[row][col] = num
-
-                if solve(board):
-                    return True
-
-                board[row][col] = 0
-    elif chosen_game == "6x6":
-        for num in range(1, 7):
-            if is_valid(board, row, col, num):
-                board[row][col] = num
-
-                if solve(board):
-                    return True
-
-                board[row][col] = 0
-    elif chosen_game == "9x9":
-        for num in range(1, 10):
-            if is_valid(board, row, col, num):
-                board[row][col] = num
-
-                if solve(board):
-                    return True
-
-                board[row][col] = 0
-
-    return False
-
-
-   
-
-def validate_against_solution(state):
+def validate_against_solution(state, grid_size):
     state.wrong_cells.clear()
     if state.solution is None:
         return
-    for row in range(GRID_SIZE):
-        for col in range(GRID_SIZE):
+    for row in range(grid_size):
+        for col in range(grid_size):
             current = state.grid[row][col]
             correct = state.solution[row][col]
             if current == 0:
@@ -258,8 +183,21 @@ def validate_against_solution(state):
 
 
 
+quiz, solution, locked = load_new_game(num_clues=DIFFICULTY_CLUES[chosen_game][selected_difficulty])
+original_grid = [row[:] for row in quiz]
+
+state = make_state(chosen_game, quiz, solution)
+
+state.solution = solution
+
+is_solved = False
+show_warning = False
+show_fill_warning = False
+running = True
+
+
 while running:
-    
+    grid_size = get_grid_size(chosen_game)
     draw_background(screen)
 
     for event in pygame.event.get():
@@ -269,6 +207,7 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if new_game_button.is_clicked(event):
                 quiz, solution, locked = load_new_game(num_clues=DIFFICULTY_CLUES[chosen_game][selected_difficulty])
+                state = make_state(chosen_game, quiz, solution)
                 state.grid = [row[:] for row in quiz]
                 state.original_grid = [row[:] for row in quiz]
                 state.solution = solution
@@ -286,10 +225,25 @@ while running:
 
             elif game_4x4_button.is_clicked(event):
                 chosen_game = "4x4"
+                quiz, solution, locked = load_new_game(chosen_game, selected_difficulty)
+                state = make_state(chosen_game, quiz, solution)
+                is_solved = False
+                show_warning = False
+                show_fill_warning = False
             elif game_6x6_button.is_clicked(event):
                 chosen_game = "6x6"
+                quiz, solution, locked = load_new_game(chosen_game, selected_difficulty)
+                state = make_state(chosen_game, quiz, solution)
+                is_solved = False
+                show_warning = False
+                show_fill_warning = False
             elif game_9x9_button.is_clicked(event):
                 chosen_game = "9x9"
+                quiz, solution, locked = load_new_game(chosen_game, selected_difficulty)
+                state = make_state(chosen_game, quiz, solution)
+                is_solved = False
+                show_warning = False
+                show_fill_warning = False
 
             elif easy_button.is_clicked(event):
                 selected_difficulty = "easy"
@@ -299,10 +253,11 @@ while running:
                 selected_difficulty = "hard"
 
             else:
+                cell_size = SCREEN_HEIGHT // grid_size
                 x, y = event.pos
                 col = x // cell_size
                 row = y // cell_size
-                if 0 <= row < GRID_SIZE and 0 <= col < GRID_SIZE:
+                if 0 <= row < grid_size and 0 <= col < grid_size:
                     state.selected_row = row
                     state.selected_col = col
 
@@ -327,21 +282,24 @@ while running:
                 pygame.K_KP5, pygame.K_KP6, pygame.K_KP7, pygame.K_KP8, pygame.K_KP9
             ):
                 value = int(event.unicode)
-                row = state.selected_row
-                col = state.selected_col
-
-                if state.original_grid[row][col] == 0 or state.solution[row][col] != state.grid[row][col]:
-                    state.grid[row][col] = value
-                    if state.solution and value == state.solution[row][col]:
-                        state.wrong_cells.discard((row, col))
-                    else:
-                        state.wrong_cells.add((row, col))
+                # Ignore numbers out of range for the current grid size
+                if value < 1 or value > grid_size:
+                    pass
+                else:
+                    row = state.selected_row
+                    col = state.selected_col
+                    if state.original_grid[row][col] == 0:
+                        state.grid[row][col] = value
+                        if state.solution and value == state.solution[row][col]:
+                            state.wrong_cells.discard((row, col))
+                        else:
+                            state.wrong_cells.add((row, col))
 
             if event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
                 board_full = all(
                     state.grid[row][col] != 0
-                     for row in range(GRID_SIZE)
-                     for col in range(GRID_SIZE)
+                     for row in range(grid_size)
+                     for col in range(grid_size)
                 )
                 if not board_full:
                     show_fill_warning = True
