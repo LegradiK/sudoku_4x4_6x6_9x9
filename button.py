@@ -3,23 +3,23 @@ import sys
 
 WHITE = (255, 255, 255)
 BLUE = (70, 130, 180)
-DARK_BLUE = (40, 90, 140)
 HIGHLIGHT = (30, 60, 110)  # darker shade for selected difficulty
-BLACK = (0, 0, 0)
 
 class Button:
-    def __init__(self, text, x, y, width, height, font_size=36):
+    def __init__(self, text, x, y, width, height, font_size=36, color=None):
         self.rect = pygame.Rect(x, y, width, height)
         self.text = text
         self.font = pygame.font.SysFont(None, font_size)
+        self.color = color if color is not None else BLUE
+        self.hover_color = tuple(max(0, c - 30) for c in self.color)
     
     def draw(self, surface, mouse_position, highlighted=False):
         if highlighted:
             color = HIGHLIGHT
         elif self.rect.collidepoint(mouse_position):
-            color = DARK_BLUE
+            color = self.hover_color
         else:
-            color = BLUE
+            color = self.color
         pygame.draw.rect(surface, color, self.rect, border_radius=0)
     
         text_surface = self.font.render(self.text, True, WHITE)
