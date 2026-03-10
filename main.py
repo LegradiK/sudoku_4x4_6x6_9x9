@@ -237,32 +237,19 @@ while running:
                     is_solved = False
                     show_warning = False
                     show_fill_warning = False
+                    screen_state = "playing"
                 elif game_4x4_button.is_clicked(event):
                         chosen_game = "4x4"
-                        state = switch_game(chosen_game, selected_difficulty)
-                        is_solved = False
-                        show_warning = False
-                        show_fill_warning = False
                 elif game_6x6_button.is_clicked(event):
                     chosen_game = "6x6"
-                    state = switch_game(chosen_game, selected_difficulty)
-                    is_solved = False
-                    show_warning = False
-                    show_fill_warning = False
                 elif game_9x9_button.is_clicked(event):
                     chosen_game = "9x9"
-                    state = switch_game(chosen_game, selected_difficulty)
-                    is_solved = False
-                    show_warning = False
-                    show_fill_warning = False
-
                 elif easy_button.is_clicked(event):
                     selected_difficulty = "easy"
                 elif medium_button.is_clicked(event):
                     selected_difficulty = "medium"
                 elif hard_button.is_clicked(event):
                     selected_difficulty = "hard"
-                screen_state = "playing"
 
 
     elif screen_state == "playing":
