@@ -103,12 +103,12 @@ def draw_instructions(screen, font, height):
 
 def draw_result(screen, font, height):
     text = font.render("PUZZLE SOLVED!", True, (255, 140, 0))
-    screen.blit(text, (810, height - 720))
+    screen.blit(text, (810, height - 470))
 
 def draw_warning(screen, font, height):
     text = font.render("Wrong answers", True, (200, 0, 0))
-    screen.blit(text, (820, height - 720))
+    screen.blit(text, (820, height - 470))
 
 def draw_fill_warning(screen, font, height):
     text = font.render("Fill all cells", True, (255, 191, 0))
-    screen.blit(text, (820, height - 720))
+    screen.blit(text, (820, height - 470))

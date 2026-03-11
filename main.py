@@ -67,7 +67,8 @@ def get_grid_size(game):
     return {"4x4": 4, "6x6": 6, "9x9": 9}[game]
 
 def load_new_game(game, difficulty):
-    # sudoku generating from Docker jotools/sudoku
+    """sudoku generating a new game according to user's choices from Docker jotools/sudoku"""
+
     url = "http://localhost:8080/api/sudoku/generate"
 
     size = get_grid_size(game)
@@ -112,6 +113,7 @@ def load_new_game(game, difficulty):
     return puzzle_grid, solution_grid, locked_grid
 
 def make_state(game, quiz, solution):
+    """create the right sized grid/game appearance"""
     size = get_grid_size(game)
     cell_size = SCREEN_HEIGHT // size
     original_grid = [row[:] for row in quiz]
@@ -149,6 +151,7 @@ def draw_difficulty_buttons(screen, mouse_pos, selected):
  
 
 def validate_against_solution(state, grid_size):
+    """check if the answer is correct or not against the solution"""
     state.wrong_cells.clear()
     if state.solution is None:
         return
@@ -162,6 +165,7 @@ def validate_against_solution(state, grid_size):
                 state.wrong_cells.add((row, col))
 
 def handle_submit(state, grid_size):
+    """check if the answer is correct when user submits, then send the message accordingly"""
     global is_solved, show_warning, show_fill_warning
     board_full = all(
                     state.grid[row][col] != 0
@@ -183,7 +187,8 @@ def handle_submit(state, grid_size):
             show_warning = True
             show_fill_warning = False
 
-def draw_how_to_play(screen, mouse_pos):
+def draw_how_to_play(screen):
+    """the initial page that user encounters, shows the instruction of how to play sudoku game/app"""
     screen.fill((255, 255, 255))
 
     # Title
@@ -223,7 +228,7 @@ running = True
 while running:
     mouse_pos = pygame.mouse.get_pos()
     if screen_state == "how_to_play":
-        draw_how_to_play(screen, mouse_pos)
+        draw_how_to_play(screen)
         draw_sudoku_buttons(screen, mouse_pos, chosen_game)
         draw_difficulty_buttons(screen, mouse_pos, selected_difficulty)
         new_game_button.draw(screen, mouse_pos)
@@ -371,6 +376,7 @@ while running:
         ui.draw_numbers(screen, state)
         ui.draw_grid_lines(screen, state)
         ui.draw_selection(screen, state)
+        ui.draw_instructions(screen, font_text, SCREEN_HEIGHT)
 
         if is_solved:
             ui.draw_result(screen, font_medium, SCREEN_HEIGHT)
@@ -378,8 +384,6 @@ while running:
             ui.draw_warning(screen, font_medium, SCREEN_HEIGHT)
         elif show_fill_warning:
             ui.draw_fill_warning(screen, font_medium, SCREEN_HEIGHT)
-        else:
-            ui.draw_instructions(screen, font_text, SCREEN_HEIGHT)
 
         draw_sudoku_buttons(screen, mouse_pos, chosen_game)
         draw_difficulty_buttons(screen, mouse_pos, selected_difficulty)
